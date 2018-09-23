@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+
+  <title>Alkuluvut</title>
+  <meta name="description" content="Alkuluvu laskuri">
+
+</head>
+
+<body>
+    <legend>Alkuluku testi</legend>
+    <p>Testaa onko annettu luku tai annettujen lukujen summa alkuluku.</p>
+
+    <div>
+        <label for="numbers">Syötä numero tai useampi numero pilkulla eroitettuna</label>
+        <input type="text" id="numbers">
+
+        <input type="button" value="Testaa" id="test-button">
+        <br>
+
+        <label for="test-respone">Vastaus:</label>
+        <input type="text" readonly="" value="" id="test-respone">
+    </div>    
+</body>
+<script>
+"use strict";
+
+function _get(query, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        callback(xmlHttp.responseText);
+    }
+
+    xmlHttp.open('get', '/primeapi' + query, true); 
+    xmlHttp.send(null);
+}
+
+function isPrime(numbers, callback) {
+    var query = "";
+    
+    if(numbers.includes(',')) {
+        query = '?action=sumandcheck&numbers=' + numbers;
+    } else {
+        query = '?action=checkprime&number=' + numbers;
+    }
+    
+    _get(query, callback);
+}
+
+document.getElementById('test-button').onclick = function(e) {
+    var numbers = document.getElementById('numbers').value;
+    
+    isPrime(numbers, function(responseText) {
+        try {
+            var json = JSON.parse(responseText);            
+            var elem =  document.getElementById('test-respone');
+            
+            if(numbers.includes(',')) {
+                elem.value = json.isPrime ?
+                'Lukujen ' + numbers +  ' summa on alkuluku'
+                : 'Lukujen ' + numbers + ' summa ei ole alkuluku';
+            } else {
+               elem.value = json.isPrime ? numbers +  ' on alkuluku' : numbers + ' ei ole alkuluku';
+            }
+        } catch(e) {
+            console.log(e.message);
+        }
+    });
+}
+</script>
+</html>
